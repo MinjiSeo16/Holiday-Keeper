@@ -1,7 +1,6 @@
 package com.example.holidaykeeper.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class HolidayService {
 		// Country 저장 + Map 캐싱
 		Map<String, Country> countryMap = countries.parallelStream()
 			.map(dto -> countryRepository.save(
-				Country.of(dto.countryCode(), dto.countryName())
+				Country.of(dto.countryCode(), dto.name())
 			))
 			.collect(Collectors.toMap(Country::getCountryCode, c -> c));
 
