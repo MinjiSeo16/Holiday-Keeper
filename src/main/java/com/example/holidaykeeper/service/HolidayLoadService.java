@@ -19,9 +19,11 @@ import com.example.holidaykeeper.exception.ResponseCode;
 import com.example.holidaykeeper.repository.CountryRepository;
 import com.example.holidaykeeper.repository.HolidayRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class HolidayLoadService {
 
