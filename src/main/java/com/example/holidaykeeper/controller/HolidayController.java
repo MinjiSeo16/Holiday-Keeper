@@ -2,13 +2,16 @@ package com.example.holidaykeeper.controller;
 
 import java.time.LocalDate;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.holidaykeeper.dto.HolidaySearchCondition;
 import com.example.holidaykeeper.dto.HolidaySliceResponse;
+import com.example.holidaykeeper.service.HolidayResyncService;
 import com.example.holidaykeeper.service.HolidaySearchService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,15 +26,14 @@ import lombok.RequiredArgsConstructor;
 public class HolidayController {
 
 	private final HolidaySearchService holidaySearchService;
+	private final HolidayResyncService holidayResyncService;
 
 	@GetMapping
 	@Operation(
 		summary = "공휴일 검색",
 		description = "국가, 연도, 기간, 커서 기반으로 공휴일 목록을 조회합니다."
 	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "200",description = "조회 성공")
-	})
+	@ApiResponses(@ApiResponse(responseCode = "200",description = "조회 성공"))
 	public HolidaySliceResponse search(
 		@Parameter(description = "국가 이름", example = "South Korea")
 		@RequestParam(required = false) String countryName,
@@ -50,5 +52,24 @@ public class HolidayController {
 			countryName, year, from, to, lastId, size
 		);
 		return holidaySearchService.search(condition);
+	}
+
+	@PostMapping("/resync")
+	@Operation(
+		summary = "공휴일 재동기화",
+		description = "특정 연도·국가의 공휴일 데이터를 외부 API에서 재조회하여 최신 상태로 갱신합니다."
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "204", description = "재동기화 완료"),
+		@ApiResponse(responseCode = "404", description = "해당 국가 코드가 존재하지 않음")
+	})
+	public ResponseEntity<Void> resync(
+		@Parameter(description = "국가 코드", example = "KR")
+		@RequestParam String countryCode,
+		@Parameter(description = "연도", example = "2025")
+		@RequestParam int year
+	) {
+		holidayResyncService.resync(countryCode, year);
+		return ResponseEntity.noContent().build();
 	}
 }
