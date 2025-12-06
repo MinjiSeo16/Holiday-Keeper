@@ -5,7 +5,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.example.holidaykeeper.service.HolidayService;
+import com.example.holidaykeeper.service.HolidayLoadService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DataInitializer {
 
-	private final HolidayService holidayService;
+	private final HolidayLoadService holidayService;
 
 	@Async
 	@EventListener(ApplicationReadyEvent.class)
