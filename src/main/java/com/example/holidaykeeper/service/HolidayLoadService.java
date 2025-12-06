@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class HolidayService {
+public class HolidayLoadService {
 
 	private final HolidayRepository holidayRepository;
 	private final CountryRepository countryRepository;
