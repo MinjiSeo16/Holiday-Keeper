@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.holidaykeeper.dto.HolidaySearchCondition;
 import com.example.holidaykeeper.dto.HolidaySliceResponse;
+import com.example.holidaykeeper.service.HolidayAutoSyncService;
 import com.example.holidaykeeper.service.HolidayDeleteService;
 import com.example.holidaykeeper.service.HolidayResyncService;
 import com.example.holidaykeeper.service.HolidaySearchService;
@@ -30,6 +31,7 @@ public class HolidayController {
 	private final HolidaySearchService holidaySearchService;
 	private final HolidayResyncService holidayResyncService;
 	private final HolidayDeleteService holidayDeleteService;
+	private final HolidayAutoSyncService autoSyncService;
 
 	@GetMapping
 	@Operation(
@@ -92,6 +94,17 @@ public class HolidayController {
 		@RequestParam int year
 	) {
 		holidayDeleteService.deleteByCountryAndYear(countryCode, year);
+		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/auto-sync")
+	@Operation(
+		summary = "공휴일 자동 동기화 수동 테스트 실행",
+		description = "전년도 + 금년도 공휴일 데이터를 즉시 재동기화합니다."
+	)
+	@ApiResponses(@ApiResponse(responseCode = "204", description = "동기화 완료"))
+	public ResponseEntity<Void> manualAutoSync() {
+		autoSyncService.syncPreviousAndCurrentYear();
 		return ResponseEntity.noContent().build();
 	}
 }
