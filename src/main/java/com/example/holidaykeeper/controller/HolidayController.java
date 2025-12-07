@@ -3,6 +3,7 @@ package com.example.holidaykeeper.controller;
 import java.time.LocalDate;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.holidaykeeper.dto.HolidaySearchCondition;
 import com.example.holidaykeeper.dto.HolidaySliceResponse;
+import com.example.holidaykeeper.service.HolidayDeleteService;
 import com.example.holidaykeeper.service.HolidayResyncService;
 import com.example.holidaykeeper.service.HolidaySearchService;
 
@@ -27,13 +29,14 @@ public class HolidayController {
 
 	private final HolidaySearchService holidaySearchService;
 	private final HolidayResyncService holidayResyncService;
+	private final HolidayDeleteService holidayDeleteService;
 
 	@GetMapping
 	@Operation(
 		summary = "공휴일 검색",
 		description = "국가, 연도, 기간, 커서 기반으로 공휴일 목록을 조회합니다."
 	)
-	@ApiResponses(@ApiResponse(responseCode = "200",description = "조회 성공"))
+	@ApiResponses(@ApiResponse(responseCode = "200", description = "조회 성공"))
 	public HolidaySliceResponse search(
 		@Parameter(description = "국가 이름", example = "South Korea")
 		@RequestParam(required = false) String countryName,
@@ -70,6 +73,25 @@ public class HolidayController {
 		@RequestParam int year
 	) {
 		holidayResyncService.resync(countryCode, year);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping
+	@Operation(
+		summary = "공휴일 삭제",
+		description = "특정 국가 코드와 연도를 기준으로 해당 연도의 공휴일 데이터를 모두 삭제합니다."
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "204", description = "삭제 성공"),
+		@ApiResponse(responseCode = "404", description = "국가 정보를 찾을 수 없음")
+	})
+	public ResponseEntity<Void> delete(
+		@Parameter(description = "국가 코드", example = "KR")
+		@RequestParam String countryCode,
+		@Parameter(description = "연도", example = "2025")
+		@RequestParam int year
+	) {
+		holidayDeleteService.deleteByCountryAndYear(countryCode, year);
 		return ResponseEntity.noContent().build();
 	}
 }
