@@ -78,22 +78,24 @@ public class HolidayLoadService {
 		List<CountryDto> countries = getAllCountries();
 
 		// Country 저장 + Map 캐싱
-		Map<String, Country> countryMap = countries.parallelStream()
+		Map<String, Country> countryMap = countries.stream()
 			.map(dto -> countryRepository.save(
 				Country.of(dto.countryCode(), dto.name())
 			))
 			.collect(Collectors.toMap(Country::getCountryCode, c -> c));
 
 		// Holiday 저장
-		countries.parallelStream().forEach(dto -> {
-			Country country = countryMap.get(dto.countryCode());
+		List<Holiday> allHolidays =
+			countries.parallelStream()
+				.flatMap(dto -> {
+					Country country = countryMap.get(dto.countryCode());
+					return IntStream.rangeClosed(startYear, endYear)
+						.parallel()
+						.mapToObj(year -> getHoliday(country, year));
+				})
+				.flatMap(List::stream)
+				.toList();
 
-			IntStream.rangeClosed(startYear, endYear)
-				.parallel()
-				.forEach(year -> {
-					List<Holiday> holidays = getHoliday(country, year);
-					holidayRepository.saveAll(holidays);
-				});
-		});
+		holidayRepository.saveAll(allHolidays);
 	}
 }
